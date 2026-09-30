@@ -1,0 +1,333 @@
+// ============================================================
+// Schéma Prisma — Plateforme de commande en ligne restaurants
+// Ziguinchor (type Jumia Food / Uber Eats, V1 mono-point-de-vente)
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------
+// ENUMS
+// ------------------------------------------------------------
+
+enum Role {
+  ADMIN               // Admin plateforme
+  RESPONSABLE_RESTO   // Responsable restaurant
+  CUISINIER           // Accès KDS
+  LIVREUR
+  CLIENT
+}
+
+enum TypeCommande {
+  LIVRAISON
+  SUR_PLACE
+  EMPORTER
+}
+
+enum StatutCommande {
+  EN_ATTENTE          // créée, en attente de confirmation resto
+  CONFIRMEE           // acceptée par le resto
+  EN_PREPARATION       // vue côté KDS, minuteur lancé
+  PRETE                // prête, en attente de livreur/retrait
+  EN_LIVRAISON
+  LIVREE
+  ANNULEE
+}
+
+enum StatutPaiement {
+  EN_ATTENTE
+  PAYE
+  ECHOUE
+  REMBOURSE
+}
+
+enum MethodePaiement {
+  WAVE
+  A_LA_LIVRAISON
+}
+
+enum StatutLivreur {
+  DISPONIBLE
+  EN_COURSE
+  HORS_LIGNE
+}
+
+enum StatutTransactionPortefeuille {
+  EN_SEQUESTRE         // commission retenue, en attente de confirmation livraison
+  VERSEE               // commission versée au restaurant
+  ANNULEE
+}
+
+// ------------------------------------------------------------
+// UTILISATEURS
+// ------------------------------------------------------------
+
+model Utilisateur {
+  id            String   @id @default(uuid())
+  nom           String
+  telephone     String   @unique
+  email         String?  @unique
+  motDePasseHash String
+  role          Role
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations selon rôle
+  restaurant      Restaurant?      @relation("ResponsableRestaurant")
+  profilLivreur   Livreur?
+  commandesClient Commande[]       @relation("ClientCommandes")
+  notations       Notation[]
+  pointsFidelite  PointsFidelite?
+  coupons         Coupon[]
+
+  @@index([role])
+}
+
+// ------------------------------------------------------------
+// RESTAURANT & MENU
+// ------------------------------------------------------------
+
+model Restaurant {
+  id             String   @id @default(uuid())
+  nom            String
+  adresse        String
+  latitude       Float
+  longitude      Float
+  description    String?
+  photoUrl       String?
+  heureOuverture String   // "08:00"
+  heureFermeture String   // "22:00"
+  tauxCommission Float    @default(8.0) // en %
+  actif          Boolean  @default(true)
+  createdAt      DateTime @default(now())
+
+  responsableId  String      @unique
+  responsable    Utilisateur @relation("ResponsableRestaurant", fields: [responsableId], references: [id])
+
+  categories     Categorie[]
+  plats          Plat[]
+  commandes      Commande[]
+  portefeuille   PortefeuilleRestaurant?
+}
+
+model Categorie {
+  id           String     @id @default(uuid())
+  nom          String     // "Entrées", "Plats", "Boissons"...
+  ordre        Int        @default(0)
+  restaurantId String
+  restaurant   Restaurant @relation(fields: [restaurantId], references: [id])
+  plats        Plat[]
+}
+
+model Plat {
+  id            String     @id @default(uuid())
+  nom           String
+  description   String?
+  photoUrl      String?
+  prix          Float
+  disponible    Boolean    @default(true) // toggle temps réel
+  restaurantId  String
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  categorieId   String
+  categorie     Categorie  @relation(fields: [categorieId], references: [id])
+
+  groupesOptions GroupeOption[]
+  lignesCommande LigneCommande[]
+}
+
+// Ex: groupe "Sauce" (choix unique) ou "Suppléments" (choix multiple)
+model GroupeOption {
+  id            String   @id @default(uuid())
+  nom           String   // "Sauce", "Sans oignon"...
+  choixMultiple Boolean  @default(false)
+  obligatoire   Boolean  @default(false)
+  platId        String
+  plat          Plat     @relation(fields: [platId], references: [id])
+  options       Option[]
+}
+
+model Option {
+  id             String        @id @default(uuid())
+  nom            String        // "Sans oignon", "Sauce à part"
+  prixSupplement Float         @default(0)
+  groupeId       String
+  groupe         GroupeOption  @relation(fields: [groupeId], references: [id])
+
+  lignesOptions  LigneCommandeOption[]
+}
+
+// ------------------------------------------------------------
+// COMMANDE
+// ------------------------------------------------------------
+
+model Commande {
+  id              String          @id @default(uuid())
+  numero          String          @unique // ex: "CMD-000123", lisible pour KDS
+  type            TypeCommande
+  statut          StatutCommande  @default(EN_ATTENTE)
+  heureSouhaitee  DateTime?       // pour commande programmée
+  montantTotal    Float
+  montantCommission Float
+  noteClient      String?         // instructions générales
+
+  clientId        String
+  client          Utilisateur     @relation("ClientCommandes", fields: [clientId], references: [id])
+  restaurantId    String
+  restaurant      Restaurant      @relation(fields: [restaurantId], references: [id])
+  livreurId       String?
+  livreur         Livreur?        @relation(fields: [livreurId], references: [id])
+
+  lignes          LigneCommande[]
+  paiement        Paiement?
+  livraison       Livraison?
+  notation        Notation?
+  transactionPortefeuille TransactionPortefeuille?
+
+  createdAt       DateTime        @default(now())
+  confirmeeAt     DateTime?
+  preteAt         DateTime?       // pour calculer le minuteur KDS
+  livreeAt        DateTime?
+
+  @@index([restaurantId, statut])
+  @@index([statut, createdAt])
+}
+
+model LigneCommande {
+  id          String   @id @default(uuid())
+  commandeId  String
+  commande    Commande @relation(fields: [commandeId], references: [id])
+  platId      String
+  plat        Plat     @relation(fields: [platId], references: [id])
+  quantite    Int      @default(1)
+  prixUnitaire Float   // snapshot du prix au moment de la commande
+
+  options     LigneCommandeOption[]
+}
+
+model LigneCommandeOption {
+  id              String        @id @default(uuid())
+  ligneCommandeId String
+  ligneCommande   LigneCommande @relation(fields: [ligneCommandeId], references: [id])
+  optionId        String
+  option          Option        @relation(fields: [optionId], references: [id])
+}
+
+// ------------------------------------------------------------
+// PAIEMENT
+// ------------------------------------------------------------
+
+model Paiement {
+  id           String          @id @default(uuid())
+  commandeId   String          @unique
+  commande     Commande        @relation(fields: [commandeId], references: [id])
+  methode      MethodePaiement
+  statut       StatutPaiement  @default(EN_ATTENTE)
+  referenceWave String?        // id transaction Wave sandbox
+  montant      Float
+  createdAt    DateTime        @default(now())
+  payeAt       DateTime?
+}
+
+// ------------------------------------------------------------
+// LIVREUR & LIVRAISON
+// ------------------------------------------------------------
+
+model Livreur {
+  id            String        @id @default(uuid())
+  utilisateurId String        @unique
+  utilisateur   Utilisateur   @relation(fields: [utilisateurId], references: [id])
+  statut        StatutLivreur @default(HORS_LIGNE)
+  latitude      Float?
+  longitude     Float?
+  moyenneNote   Float?        @default(0)
+
+  commandes     Commande[]
+  livraisons    Livraison[]
+}
+
+model Livraison {
+  id                 String    @id @default(uuid())
+  commandeId         String    @unique
+  commande           Commande  @relation(fields: [commandeId], references: [id])
+  livreurId          String
+  livreur            Livreur   @relation(fields: [livreurId], references: [id])
+  distanceKm         Float?
+  dureeEstimeeMin    Int?
+  itineraireGeoJson  String?   // résultat OpenRouteService, stocké tel quel
+  confirmeeAt        DateTime?
+  createdAt          DateTime  @default(now())
+}
+
+// ------------------------------------------------------------
+// PORTEFEUILLE / SÉQUESTRE COMMISSION
+// ------------------------------------------------------------
+
+model PortefeuilleRestaurant {
+  id            String     @id @default(uuid())
+  restaurantId  String     @unique
+  restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+  solde         Float      @default(0) // montants déjà versés (net de commission)
+
+  transactions  TransactionPortefeuille[]
+}
+
+model TransactionPortefeuille {
+  id              String                        @id @default(uuid())
+  portefeuilleId  String
+  portefeuille    PortefeuilleRestaurant        @relation(fields: [portefeuilleId], references: [id])
+  commandeId      String                        @unique
+  commande        Commande                      @relation(fields: [commandeId], references: [id])
+  montantBrut     Float                         // montant total commande
+  montantCommission Float                       // part plateforme
+  montantNet      Float                         // versé au resto
+  statut          StatutTransactionPortefeuille @default(EN_SEQUESTRE)
+  createdAt       DateTime                      @default(now())
+  verseeAt        DateTime?
+}
+
+// ------------------------------------------------------------
+// FIDÉLITÉ
+// ------------------------------------------------------------
+
+model PointsFidelite {
+  id            String      @id @default(uuid())
+  utilisateurId String      @unique
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+  solde         Int         @default(0)
+  totalGagne    Int         @default(0)
+  updatedAt     DateTime    @updatedAt
+}
+
+model Coupon {
+  id            String      @id @default(uuid())
+  code          String      @unique
+  utilisateurId String
+  utilisateur   Utilisateur @relation(fields: [utilisateurId], references: [id])
+  pourcentage   Float?      // réduction en %
+  montantFixe   Float?      // ou réduction fixe en FCFA
+  utilise       Boolean     @default(false)
+  expireAt      DateTime?
+  createdAt     DateTime    @default(now())
+}
+
+// ------------------------------------------------------------
+// NOTATION
+// ------------------------------------------------------------
+
+model Notation {
+  id           String      @id @default(uuid())
+  commandeId   String      @unique
+  commande     Commande    @relation(fields: [commandeId], references: [id])
+  clientId     String
+  client       Utilisateur @relation(fields: [clientId], references: [id])
+  noteRepas    Int         // 1-5
+  noteLivreur  Int?        // 1-5, null si emporté/sur place
+  commentaire  String?
+  createdAt    DateTime    @default(now())
+}
