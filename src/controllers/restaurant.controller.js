@@ -44,7 +44,7 @@ async function tableauDeBord(req, res, next) {
 
     const commandesDuJour = await prisma.commande.findMany({
       where: { restaurantId, createdAt: { gte: aujourdHui } },
-      include: { lignes: true },
+      include: { lignes: { include: { plat: true } } },
     });
 
     const caDuJour = commandesDuJour
@@ -55,9 +55,37 @@ async function tableauDeBord(req, res, next) {
     const annulees = commandesDuJour.filter((c) => c.statut === 'ANNULEE').length;
     const tauxAnnulation = totalCommandes ? (annulees / totalCommandes) * 100 : 0;
 
-    // TODO: heure de pointe + plats les plus commandés (agrégation sur LigneCommande)
+    // Heure de pointe : l'heure (0-23) qui a reçu le plus de commandes aujourd'hui.
+    // TODO (fuseau horaire) : getHours() utilise l'heure du serveur, pas forcément celle
+    // de Ziguinchor (UTC) — à corriger si le serveur de déploiement n'est pas sur UTC/GMT.
+    const commandesParHeure = {};
+    commandesDuJour.forEach((c) => {
+      const heure = new Date(c.createdAt).getHours();
+      commandesParHeure[heure] = (commandesParHeure[heure] || 0) + 1;
+    });
+    let heureDePointe = null;
+    let maxCommandes = 0;
+    for (const [heure, nb] of Object.entries(commandesParHeure)) {
+      if (nb > maxCommandes) {
+        maxCommandes = nb;
+        heureDePointe = Number(heure);
+      }
+    }
 
-    res.json({ caDuJour, totalCommandes, tauxAnnulation });
+    // Plats les plus commandés aujourd'hui (top 5, par quantité cumulée)
+    const quantitesParPlat = {};
+    commandesDuJour.forEach((c) => {
+      c.lignes.forEach((l) => {
+        const nom = l.plat?.nom || 'Plat supprimé';
+        quantitesParPlat[nom] = (quantitesParPlat[nom] || 0) + l.quantite;
+      });
+    });
+    const platsPlusCommandes = Object.entries(quantitesParPlat)
+      .map(([nom, quantite]) => ({ nom, quantite }))
+      .sort((a, b) => b.quantite - a.quantite)
+      .slice(0, 5);
+
+    res.json({ caDuJour, totalCommandes, tauxAnnulation, heureDePointe, platsPlusCommandes });
   } catch (err) { next(err); }
 }
 

@@ -4,6 +4,7 @@ const ctrl = require('../controllers/plat.controller');
 
 router.post('/', verifierJWT, requireRole('RESPONSABLE_RESTO'), ctrl.creerPlat);
 router.patch('/:id', verifierJWT, requireRole('RESPONSABLE_RESTO'), ctrl.mettreAJourPlat);
+router.delete('/:id', verifierJWT, requireRole('RESPONSABLE_RESTO'), ctrl.supprimerPlat);
 
 /**
  * @swagger

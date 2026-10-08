@@ -27,4 +27,11 @@ async function mettreAJourPlat(req, res, next) {
   } catch (err) { next(err); }
 }
 
-module.exports = { creerPlat, basculerDisponibilite, mettreAJourPlat };
+async function supprimerPlat(req, res, next) {
+  try {
+    await prisma.plat.delete({ where: { id: req.params.id } });
+    res.status(204).send();
+  } catch (err) { next(err); }
+}
+
+module.exports = { creerPlat, basculerDisponibilite, mettreAJourPlat, supprimerPlat };
