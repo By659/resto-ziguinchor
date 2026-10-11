@@ -3,11 +3,11 @@ const prisma = require('../config/prisma');
 const POINTS_PAR_TRANCHE = 100; // 1 point par 100 FCFA dépensés
 
 // À appeler quand une commande passe au statut LIVREE
-async function crediterPoints(commandeId) {
-  const commande = await prisma.commande.findUnique({ where: { id: commandeId } });
+async function crediterPoints(commandeId, db = prisma) {
+  const commande = await db.commande.findUnique({ where: { id: commandeId } });
   const pointsGagnes = Math.floor(commande.montantTotal / POINTS_PAR_TRANCHE);
 
-  await prisma.pointsFidelite.upsert({
+  await db.pointsFidelite.upsert({
     where: { utilisateurId: commande.clientId },
     update: { solde: { increment: pointsGagnes }, totalGagne: { increment: pointsGagnes } },
     create: { utilisateurId: commande.clientId, solde: pointsGagnes, totalGagne: pointsGagnes },

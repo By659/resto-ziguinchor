@@ -5,7 +5,19 @@ const {
   changerStatut,
   obtenirCommande,
   commandesRestaurant,
+  mesCommandes,
+  commandesDisponiblesLivraison,
 } = require('../controllers/commande.controller');
+const { mesLivraisons } = require('../controllers/livraison.controller');
+
+router.get('/mes-commandes', verifierJWT, requireRole('CLIENT'), mesCommandes);
+router.get(
+  '/disponibles-livraison',
+  verifierJWT,
+  requireRole('LIVREUR'),
+  commandesDisponiblesLivraison
+);
+router.get('/mes-livraisons', verifierJWT, requireRole('LIVREUR'), mesLivraisons);
 
 /**
  * @swagger

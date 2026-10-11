@@ -44,34 +44,58 @@ async function calculerItineraire(origine, destination) {
 
 async function accepterCourse(req, res, next) {
   try {
-    // destinationLat/destinationLng : coordonnées du point de livraison.
-    // TODO (amélioration schéma) : stocker l'adresse/coordonnées de livraison sur la Commande
-    // elle-même à la création, plutôt que de les redemander ici.
-    const { commandeId, destinationLat, destinationLng } = req.body;
+    const { commandeId } = req.body;
+    if (typeof commandeId !== 'string' || !commandeId) {
+      return res.status(400).json({ message: 'L’identifiant de la commande est requis' });
+    }
 
-    // Commande.livreurId référence Livreur.id (pas directement Utilisateur.id) :
-    // on retrouve/crée d'abord le profil Livreur associé à l'utilisateur connecté.
-    const livreur = await prisma.livreur.upsert({
-      where: { utilisateurId: req.utilisateur.id },
-      update: {},
-      create: { utilisateurId: req.utilisateur.id, statut: 'EN_COURSE' },
-    });
-
-    const commande = await prisma.commande.update({
+    const commande = await prisma.commande.findUnique({
       where: { id: commandeId },
-      data: { livreurId: livreur.id, statut: 'EN_LIVRAISON' },
+      include: { restaurant: true },
     });
+    if (!commande) return res.status(404).json({ message: 'Commande introuvable' });
+    if (commande.type !== 'LIVRAISON' || commande.statut !== 'PRETE' || commande.livreurId) {
+      return res.status(409).json({ message: 'Cette commande n’est plus disponible à la livraison' });
+    }
+    if (commande.latitudeLivraison == null || commande.longitudeLivraison == null) {
+      return res.status(422).json({ message: 'Les coordonnées de livraison sont manquantes' });
+    }
 
-    const restaurant = await prisma.restaurant.findUnique({ where: { id: commande.restaurantId } });
+    const destination = {
+      latitude: commande.latitudeLivraison,
+      longitude: commande.longitudeLivraison,
+    };
+    const { distanceKm, dureeEstimeeMin, itineraireGeoJson } = await calculerItineraire(
+      commande.restaurant,
+      destination
+    );
 
-    const destination = destinationLat && destinationLng
-      ? { latitude: destinationLat, longitude: destinationLng }
-      : null;
+    const livraison = await prisma.$transaction(async (tx) => {
+      // Commande.livreurId référence Livreur.id, pas Utilisateur.id.
+      const livreur = await tx.livreur.upsert({
+        where: { utilisateurId: req.utilisateur.id },
+        update: { statut: 'EN_COURSE' },
+        create: { utilisateurId: req.utilisateur.id, statut: 'EN_COURSE' },
+      });
 
-    const { distanceKm, dureeEstimeeMin, itineraireGeoJson } = await calculerItineraire(restaurant, destination);
+      const attribution = await tx.commande.updateMany({
+        where: {
+          id: commandeId,
+          type: 'LIVRAISON',
+          statut: 'PRETE',
+          livreurId: null,
+        },
+        data: { livreurId: livreur.id, statut: 'EN_LIVRAISON' },
+      });
+      if (attribution.count === 0) {
+        const err = new Error('Cette commande vient d’être acceptée par un autre livreur');
+        err.statusCode = 409;
+        throw err;
+      }
 
-    const livraison = await prisma.livraison.create({
-      data: { commandeId, livreurId: livreur.id, distanceKm, dureeEstimeeMin, itineraireGeoJson },
+      return tx.livraison.create({
+        data: { commandeId, livreurId: livreur.id, distanceKm, dureeEstimeeMin, itineraireGeoJson },
+      });
     });
 
     res.status(201).json(livraison);
@@ -82,14 +106,70 @@ async function accepterCourse(req, res, next) {
 
 async function confirmerLivraison(req, res, next) {
   try {
-    const livraison = await prisma.livraison.update({
+    const existante = await prisma.livraison.findUnique({
       where: { id: req.params.id },
-      data: { confirmeeAt: new Date() },
+      include: { livreur: true },
     });
+    if (!existante) return res.status(404).json({ message: 'Livraison introuvable' });
+    if (existante.livreur.utilisateurId !== req.utilisateur.id) {
+      return res.status(403).json({ message: 'Cette livraison ne vous est pas attribuée' });
+    }
+
+    const { crediterPoints } = require('./fidelite.controller');
+    const { verserCommission } = require('./portefeuille.controller');
+    const livraison = await prisma.$transaction(async (tx) => {
+      const transition = await tx.commande.updateMany({
+        where: {
+          id: existante.commandeId,
+          statut: 'EN_LIVRAISON',
+          livreurId: existante.livreurId,
+        },
+        data: { statut: 'LIVREE', livreeAt: new Date() },
+      });
+      if (transition.count === 0) {
+        const err = new Error('Cette commande n’est plus en cours de livraison');
+        err.statusCode = 409;
+        throw err;
+      }
+
+      const confirmee = await tx.livraison.update({
+        where: { id: existante.id },
+        data: { confirmeeAt: new Date() },
+      });
+      await tx.livreur.update({
+        where: { id: existante.livreurId },
+        data: { statut: 'DISPONIBLE' },
+      });
+      await crediterPoints(existante.commandeId, tx);
+      await verserCommission(existante.commandeId, tx);
+      return confirmee;
+    });
+
     res.json(livraison);
   } catch (err) {
     next(err);
   }
 }
 
-module.exports = { accepterCourse, confirmerLivraison };
+async function mesLivraisons(req, res, next) {
+  try {
+    const livraisons = await prisma.livraison.findMany({
+      where: {
+        livreur: { utilisateurId: req.utilisateur.id },
+        confirmeeAt: null,
+        commande: { statut: 'EN_LIVRAISON' },
+      },
+      orderBy: { createdAt: 'desc' },
+      include: {
+        commande: {
+          include: { restaurant: true, lignes: { include: { plat: true } } },
+        },
+      },
+    });
+    res.json(livraisons);
+  } catch (err) {
+    next(err);
+  }
+}
+
+module.exports = { accepterCourse, confirmerLivraison, mesLivraisons };

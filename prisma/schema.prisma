@@ -175,6 +175,9 @@ model Commande {
   montantTotal    Float
   montantCommission Float
   noteClient      String?         // instructions générales
+  adresseLivraison String?
+  latitudeLivraison Float?
+  longitudeLivraison Float?
 
   clientId        String
   client          Utilisateur     @relation("ClientCommandes", fields: [clientId], references: [id])
