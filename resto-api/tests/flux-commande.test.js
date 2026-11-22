@@ -145,7 +145,7 @@ describe('Flux critique : commande -> KDS -> livraison -> séquestre/fidélité'
     const fetchOriginal = global.fetch;
     process.env.OPENROUTESERVICE_API_KEY = 'cle-test';
     global.fetch = jest.fn(async (url) => {
-      if (String(url).includes('/geocode/search')) {
+      if (String(url).includes('/pelias/v1/search')) {
         return {
           ok: true,
           json: async () => ({ features: [{ geometry: { coordinates: [-16.26, 12.56] } }] }),

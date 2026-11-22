@@ -1,10 +1,10 @@
 # Mise en ligne RestoClik — Render et Vercel
 
-## État de cette préparation
+## État du déploiement
 
-Le projet existant reste dans ses dossiers `resto-api/` et `resto-frontend/`. L’API sait déjà enregistrer les comptes et les commandes dans PostgreSQL. Le présent fichier prépare le déploiement; **aucun service cloud n’a été créé, aucune base distante n’a été modifiée et aucune migration n’a été lancée**.
+Le frontend est publié sur `https://resto-ziguinchor.vercel.app` et l’API sur `https://resto-ziguinchor.onrender.com`. Le PostgreSQL Render et le service API existent déjà; l’API répond sur `/health`. La base locale `resto_ziguinchor` reste séparée et intacte : aucune donnée métier locale n’a été copiée.
 
-La base locale `resto_ziguinchor` reste séparée et intacte. Le PostgreSQL Render devra être une **nouvelle base distante**. Cette procédure ne copie pas les comptes, restaurants, menus ou commandes de la base locale. Une copie de données est une opération distincte qui exige une sauvegarde et une confirmation explicite.
+Les variables de connexion `DATABASE_URL` sont configurées dans Render. Avant de restreindre le CORS, configure `CORS_ORIGIN=https://resto-ziguinchor.vercel.app` et vérifie que le service possède aussi un `JWT_SECRET` privé généré dans Render. Ne copie aucun secret dans Git, Vercel ou une conversation.
 
 ## Fichiers préparés
 
@@ -34,7 +34,7 @@ Valeurs de configuration :
 
 - `DATABASE_URL` : connection string interne de la nouvelle base Render.
 - `JWT_SECRET` : généré automatiquement par le Blueprint.
-- `CORS_ORIGIN` : après avoir créé le site Vercel, renseigne son origine exacte, par exemple `https://restoclik.vercel.app`; plusieurs origines peuvent être séparées par des virgules. N’utilise pas `*` en production.
+- `CORS_ORIGIN` : renseigne l’origine exacte Vercel `https://resto-ziguinchor.vercel.app`; plusieurs origines peuvent être séparées par des virgules. N’utilise pas `*` en production.
 - `OPENROUTESERVICE_API_KEY` : actuellement la valeur sentinelle `ors_key`; les commandes de livraison resteront indisponibles tant qu’une vraie clé serveur n’est pas ajoutée.
 
 Le Blueprint désactive le déploiement automatique par commit. Tu peux donc vérifier les changements avant chaque déploiement manuel.
@@ -52,7 +52,7 @@ VITE_SOCKET_URL=https://<nom-du-service-render>.onrender.com
 
 Ces valeurs sont injectées lors du build Vite; reconstruis le frontend après tout changement. Une variable `VITE_` est publique dans le JavaScript livré : ne mets aucune clé secrète Wave, PostgreSQL ou JWT dans Vercel.
 
-Après le premier déploiement Vercel, récupère l’origine de production exacte, ajoute-la à `CORS_ORIGIN` dans Render puis redéploie l’API. Si tu ajoutes un domaine personnalisé, ajoute aussi son origine exacte à cette variable.
+L’origine Vercel de production est `https://resto-ziguinchor.vercel.app`; ajoute-la à `CORS_ORIGIN` dans Render puis redéploie l’API. Si tu ajoutes un domaine personnalisé, ajoute aussi son origine exacte à cette variable.
 
 ### 5. Initialiser le schéma distant — arrêt obligatoire avant la commande
 
