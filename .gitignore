@@ -1,0 +1,10 @@
+node_modules/
+**/node_modules/
+.env
+.env.test
+**/.env
+**/.env.test
+resto-frontend/dist/
+resto-api/coverage/
+.DS_Store
+Thumbs.db

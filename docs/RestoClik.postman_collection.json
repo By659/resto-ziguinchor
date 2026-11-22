@@ -1,0 +1,17 @@
+{
+  "info": { "name": "RestoClik Ziguinchor", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json" },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:4000" },
+    { "key": "token", "value": "" },
+    { "key": "commandeId", "value": "" }
+  ],
+  "item": [
+    { "name": "Healthcheck", "request": { "method": "GET", "url": "{{baseUrl}}/health" } },
+    { "name": "Restaurants publics", "request": { "method": "GET", "url": "{{baseUrl}}/api/restaurants" } },
+    { "name": "Inscription client", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"nom\": \"Awa Diop\",\n  \"telephone\": \"771234567\",\n  \"email\": \"awa@example.com\",\n  \"motDePasse\": \"test123456\",\n  \"role\": \"CLIENT\"\n}" }, "url": "{{baseUrl}}/api/auth/register" } },
+    { "name": "Connexion", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"telephone\": \"771234567\",\n  \"motDePasse\": \"test123456\"\n}" }, "url": "{{baseUrl}}/api/auth/login" } },
+    { "name": "Mes points", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/api/fidelite/moi" } },
+    { "name": "Mes coupons", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/api/fidelite/mes-coupons" } },
+    { "name": "Historique commandes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{baseUrl}}/api/commandes/mes-commandes" } }
+  ]
+}

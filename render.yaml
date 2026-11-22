@@ -1,0 +1,22 @@
+services:
+  - type: web
+    name: restoclik-api
+    runtime: node
+    rootDir: resto-api
+    buildCommand: npm ci && npx prisma generate
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeployTrigger: 'off'
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CORS_ORIGIN
+        sync: false
+      - key: OPENROUTESERVICE_API_KEY
+        value: ors_key

@@ -1,0 +1,120 @@
+openapi: 3.0.3
+info:
+  title: RestoClik Ziguinchor API
+  version: 1.0.0
+  description: API de commande, livraison, fidélité et KDS.
+servers:
+  - url: http://localhost:4000/api
+security:
+  - bearerAuth: []
+paths:
+  /auth/register:
+    post:
+      security: []
+      summary: Créer un compte client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RegisterRequest' }
+      responses: { '201': { description: Compte créé } }
+  /auth/login:
+    post:
+      security: []
+      summary: Obtenir un JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses: { '200': { description: Authentification réussie } }
+  /restaurants:
+    get:
+      security: []
+      summary: Lister les restaurants actifs
+      responses: { '200': { description: Liste des restaurants } }
+  /restaurants/moi:
+    get:
+      summary: Obtenir le restaurant du responsable connecté
+      responses: { '200': { description: Restaurant associé au responsable }, '401': { description: JWT manquant ou invalide }, '403': { description: Rôle non autorisé }, '404': { description: Aucun restaurant associé } }
+  /restaurants/{id}:
+    get:
+      security: []
+      summary: Obtenir un restaurant avec son menu et ses options
+      parameters: [{ in: path, name: id, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: Restaurant } }
+  /commandes:
+    post:
+      summary: Créer une commande avec options, coupon et paiement
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CommandeRequest' }
+      responses: { '201': { description: Commande créée }, '409': { description: Données métier invalides } }
+  /commandes/mes-commandes:
+    get:
+      summary: Historique du client
+      responses: { '200': { description: Historique } }
+  /fidelite/moi:
+    get:
+      summary: Consulter ses points
+      responses: { '200': { description: Solde fidélité } }
+  /fidelite/mes-coupons:
+    get:
+      summary: Consulter ses coupons
+      responses: { '200': { description: Coupons } }
+  /notations/commandes/{commandeId}:
+    post:
+      summary: Noter une commande livrée
+      parameters: [{ in: path, name: commandeId, required: true, schema: { type: string, format: uuid } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/NotationRequest' }
+      responses: { '201': { description: Avis créé } }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [nom, telephone, motDePasse]
+      properties:
+        nom: { type: string }
+        telephone: { type: string }
+        email: { type: string, format: email }
+        motDePasse: { type: string, minLength: 8 }
+    LoginRequest:
+      type: object
+      required: [telephone, motDePasse]
+      properties:
+        telephone: { type: string }
+        motDePasse: { type: string }
+    CommandeRequest:
+      type: object
+      required: [restaurantId, type, lignes]
+      properties:
+        restaurantId: { type: string, format: uuid }
+        type: { type: string, enum: [LIVRAISON, SUR_PLACE, EMPORTER] }
+        methodePaiement: { type: string, enum: [WAVE, A_LA_LIVRAISON] }
+        couponId: { type: string, format: uuid }
+        adresseLivraison: { type: string }
+        heureSouhaitee: { type: string, format: date-time }
+        lignes:
+          type: array
+          items:
+            type: object
+            required: [platId, quantite]
+            properties:
+              platId: { type: string, format: uuid }
+              quantite: { type: integer, minimum: 1, maximum: 50 }
+              optionIds: { type: array, items: { type: string, format: uuid } }
+    NotationRequest:
+      type: object
+      required: [noteRepas]
+      properties:
+        noteRepas: { type: integer, minimum: 1, maximum: 5 }
+        noteLivreur: { type: integer, minimum: 1, maximum: 5 }
+        commentaire: { type: string }

@@ -1,0 +1,414 @@
+/* Surcouche incrémentale de l’interface existante : palette et composants RestoClik. */
+:root {
+  --ink: #3f3108;
+  --muted: #8a7642;
+  --orange: #cc961f;
+  --deep: #7a5e12;
+  --cream: #fff3d8;
+  --line: #ead9b1;
+  --dark: #5a4a0d;
+  --sage-light: #f3d789;
+  --sage-pale: #ebb84a;
+  --sage-mid: #cc961f;
+  --sage: #a67917;
+  --sage-deep: #7a5e12;
+  --gold-50: #fffaf0;
+  --gold-100: #fff3d8;
+  --gold-200: #f3d789;
+  --gold-300: #ebb84a;
+  --gold-500: #cc961f;
+  --gold-700: #a67917;
+  --gold-900: #5a4a0d;
+  --shadow-soft: 0 10px 32px rgba(90, 74, 13, .09);
+}
+
+html { scroll-padding-top: 84px; }
+body { background: var(--gold-50); color: var(--ink); font-family: 'Figtree', sans-serif; }
+button, input, textarea, select { font-family: inherit; }
+h1, h2, h3, .font-serif { font-family: 'Outfit', sans-serif; }
+a { color: inherit; }
+
+/* En-tête commun */
+.site-header { position: sticky; top: 0; z-index: 50; background: #fff; border-bottom: 1px solid #eeeae1; }
+.site-header-inner { width: min(100% - 24px, 1280px); min-height: 62px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 22px; }
+.site-brand { display: inline-flex; align-items: center; gap: 8px; flex: none; }
+.site-brand-mark { width: 39px; height: 39px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(145deg, #e8b746, #b27b17); color: #fffaf0; font: 700 19px 'Outfit', sans-serif; box-shadow: inset 0 0 0 2px rgba(255, 243, 216, .38); }
+.site-brand-name { color: var(--gold-900); font: 700 22px/1 'Outfit', sans-serif; letter-spacing: -.9px; }
+.site-brand-name > span { color: var(--gold-700); }
+.site-nav { display: flex; align-items: center; justify-content: center; gap: clamp(14px, 2vw, 29px); flex: 1; }
+.site-nav a, .site-account-link { color: #272419; font-size: 13px; font-weight: 400; white-space: nowrap; transition: color .18s ease; }
+.site-nav a:hover, .site-account-link:hover { color: var(--gold-700); }
+.site-header-actions { display: flex; align-items: center; gap: 12px; flex: none; }
+.site-register-link { border: 1px solid var(--gold-900); border-radius: 999px; padding: 9px 16px; color: #fffaf0; background: var(--gold-900); font-size: 12px; font-weight: 700; white-space: nowrap; transition: background .18s ease, color .18s ease; }
+.site-register-link:hover { background: var(--gold-700); }
+.site-cart-link { position: relative; width: 39px; min-width: 39px; height: 39px; display: grid; place-items: center; border-radius: 50%; color: var(--gold-900); background: var(--gold-100); }
+.site-cart-link svg, .site-menu-toggle svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.site-cart-count { position: absolute; top: -4px; right: -5px; min-width: 17px; height: 17px; display: grid; place-items: center; border: 2px solid #fffdf7; border-radius: 50%; color: white; background: var(--gold-700); font-size: 9px; font-weight: 700; }
+.site-menu-toggle { display: none; width: 35px; height: 39px; place-items: center; padding: 0; border: 0; color: #262419; background: transparent; }
+.site-mobile-nav { display: none; }
+
+/* Accueil */
+.reference-site { min-height: 100vh; background: var(--gold-50); }
+.reference-hero { min-height: 585px; display: flex; align-items: center; background-color: #73560f; background-position: center 48%; background-repeat: no-repeat; background-size: cover; color: #fffaf0; }
+.reference-hero-copy { width: min(100% - 48px, 1170px); margin: 0 auto; padding: 78px 0 86px; }
+.reference-location { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 20px; padding: 8px 12px; border: 1px solid rgba(255, 243, 216, .35); border-radius: 99px; color: #fff3d8; background: rgba(50, 37, 4, .2); font-size: 11px; font-weight: 600; letter-spacing: .2px; }
+.reference-hero h1 { max-width: 740px; margin: 0; font: 700 clamp(47px, 6.8vw, 82px)/.98 'Outfit', sans-serif; letter-spacing: -3.5px; }
+.reference-hero h1 em { color: var(--gold-300); font-style: normal; }
+.reference-hero-text { max-width: 470px; margin: 20px 0 26px; color: rgba(255, 250, 240, .9); font-size: 16px; line-height: 1.65; }
+.reference-search { width: min(100%, 625px); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; padding: 7px; border: 1px solid rgba(255, 243, 216, .45); border-radius: 11px; background: rgba(255, 253, 247, .98); box-shadow: 0 18px 48px rgba(33, 25, 5, .24); }
+.reference-search-field { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 0 12px; color: var(--gold-700); }
+.reference-search-field > span { font-size: 22px; }
+.reference-search-field input { width: 100%; min-width: 0; padding: 12px 0; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 13px; }
+.reference-search-field input::placeholder { color: #a3946d; }
+.reference-button { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; gap: 14px; padding: 0 19px; border: 1px solid var(--gold-900); border-radius: 7px; color: var(--gold-100); background: var(--gold-900); font-size: 12px; font-weight: 700; transition: transform .18s ease, background .18s ease; }
+.reference-button:hover { background: var(--gold-700); transform: translateY(-1px); }
+.reference-button:disabled { opacity: .65; cursor: wait; transform: none; }
+.reference-button span { font-size: 17px; }
+.reference-schedule { grid-column: 1 / -1; padding: 0 12px 2px; color: var(--gold-700); font-size: 11px; }
+.reference-schedule summary { width: fit-content; cursor: pointer; }
+.reference-schedule-fields { display: flex; align-items: center; flex-wrap: wrap; gap: 9px; padding: 10px 0 6px; color: var(--muted); }
+.reference-schedule-fields input { padding: 8px; border: 1px solid var(--line); border-radius: 6px; color: var(--ink); background: white; font-size: 11px; }
+.reference-schedule-fields button { border: 0; color: var(--gold-700); background: transparent; font-size: 11px; font-weight: 700; }
+.reference-error { margin: 12px 2px 0; color: #b44432; font-size: 12px; line-height: 1.5; }
+.reference-hero .reference-error { color: #ffdfd5; }
+.reference-section { width: min(100% - 48px, 1170px); margin: 0 auto; padding: 66px 0; }
+.reference-categories { padding-bottom: 56px; }
+.reference-section-heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 25px; }
+.reference-eyebrow { margin: 0 0 8px; color: var(--gold-700); font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; }
+.reference-section-heading h2, .restaurant-results-heading h2, .restaurant-menu-heading h2 { margin: 0; color: var(--gold-900); font: 700 clamp(27px, 3.4vw, 40px)/1.08 'Outfit', sans-serif; letter-spacing: -1.1px; }
+.reference-text-link { display: inline-flex; align-items: center; gap: 9px; padding: 0; border: 0; color: var(--gold-700); background: transparent; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.reference-text-link:hover { color: var(--gold-900); }
+.reference-category-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; }
+.reference-category-card { position: relative; min-height: 96px; display: flex; align-items: center; gap: 13px; padding: 17px; border: 1px solid rgba(122, 94, 18, .13); border-radius: 9px; color: var(--gold-900); background: #fffdf7; box-shadow: 0 5px 15px rgba(90, 74, 13, .035); font-size: 13px; font-weight: 700; transition: border-color .18s ease, transform .18s ease, box-shadow .18s ease; }
+.reference-category-card:hover { border-color: var(--gold-300); transform: translateY(-3px); box-shadow: var(--shadow-soft); }
+.reference-category-icon { width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%; background: var(--gold-100); font-size: 21px; }
+.reference-category-arrow { margin-left: auto; color: #b49b5c; font-size: 15px; }
+.reference-featured { width: 100%; padding: 68px max(24px, calc((100% - 1170px) / 2)) 73px; background: #fffdf7; }
+.reference-featured > .reference-section-heading, .reference-featured > .reference-restaurant-grid { width: min(100%, 1170px); margin-left: auto; margin-right: auto; }
+.reference-restaurant-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 19px; }
+.reference-restaurant-card { min-width: 0; overflow: hidden; border: 1px solid rgba(122, 94, 18, .14); border-radius: 10px; color: var(--ink); background: #fff; box-shadow: 0 7px 22px rgba(90, 74, 13, .035); transition: transform .2s ease, box-shadow .2s ease; }
+.reference-restaurant-card:hover { transform: translateY(-4px); box-shadow: 0 18px 34px rgba(90, 74, 13, .12); }
+.reference-restaurant-image { position: relative; height: 210px; overflow: hidden; background: var(--gold-100); }
+.reference-restaurant-image img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .35s ease; }
+.reference-restaurant-card:hover .reference-restaurant-image img { transform: scale(1.045); }
+.reference-offer-badge, .reference-closed-badge, .reference-rating { position: absolute; z-index: 1; display: inline-flex; align-items: center; border-radius: 4px; font-size: 10px; font-weight: 700; }
+.reference-offer-badge { top: 12px; left: 12px; max-width: calc(100% - 88px); padding: 7px 9px; color: var(--gold-900); background: var(--gold-200); }
+.reference-closed-badge { top: 12px; left: 12px; padding: 7px 9px; color: #fff; background: rgba(54, 40, 9, .8); }
+.reference-rating { top: 12px; right: 12px; gap: 4px; padding: 7px 8px; color: var(--gold-900); background: rgba(255, 253, 247, .95); }
+.reference-restaurant-info { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; padding: 17px 17px 11px; }
+.reference-restaurant-info h3 { margin: 0; color: var(--gold-900); font: 700 18px/1.2 'Outfit', sans-serif; }
+.reference-restaurant-info p { margin: 6px 0 0; color: #887a57; font-size: 11px; }
+.reference-card-arrow { color: var(--gold-700); font-size: 18px; }
+.reference-restaurant-meta { display: flex; flex-wrap: wrap; gap: 8px 13px; padding: 0 17px 17px; color: #83764f; font-size: 10px; }
+.reference-how { display: grid; grid-template-columns: .85fr 1.15fr; gap: 65px; padding: 73px max(24px, calc((100% - 1170px) / 2)); color: var(--gold-100); background: var(--gold-900); }
+.reference-how .reference-eyebrow { color: var(--gold-300); }
+.reference-how-intro h2 { max-width: 410px; margin: 0; font: 700 clamp(32px, 4vw, 48px)/1.02 'Outfit', sans-serif; letter-spacing: -1.6px; }
+.reference-how-intro > p:last-child { max-width: 410px; color: rgba(255, 243, 216, .72); font-size: 13px; line-height: 1.7; }
+.reference-how-steps { display: grid; gap: 20px; }
+.reference-how-steps article { display: grid; grid-template-columns: 47px 1fr; align-items: start; gap: 16px; padding-bottom: 18px; border-bottom: 1px solid rgba(255, 243, 216, .17); }
+.reference-how-steps article:last-child { border-bottom: 0; padding-bottom: 0; }
+.reference-how-steps article > span { color: var(--gold-300); font: 700 18px 'Outfit', sans-serif; }
+.reference-how-steps h3 { margin: 0 0 5px; font-size: 16px; }
+.reference-how-steps p { margin: 0; color: rgba(255, 243, 216, .71); font-size: 12px; line-height: 1.6; }
+.reference-join { width: min(100% - 48px, 1170px); display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 0 auto; padding: 42px 0; }
+.reference-join-card { display: flex; align-items: center; gap: 15px; padding: 19px; border: 1px solid var(--line); border-radius: 9px; background: #fffdf7; transition: border-color .2s ease, transform .2s ease; }
+.reference-join-card:hover { border-color: var(--gold-300); transform: translateY(-2px); }
+.reference-join-icon { width: 45px; height: 45px; display: grid; place-items: center; border-radius: 50%; background: var(--gold-100); font-size: 20px; }
+.reference-join-card > span:nth-child(2) { display: grid; gap: 4px; flex: 1; }
+.reference-join-card strong { color: var(--gold-900); font-size: 13px; }
+.reference-join-card small { color: var(--muted); font-size: 11px; line-height: 1.4; }
+.reference-join-card > b { color: var(--gold-700); }
+.reference-footer { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 25px; padding: 29px max(24px, calc((100% - 1170px) / 2)); border-top: 1px solid rgba(122, 94, 18, .15); color: #81744f; background: #fffdf7; }
+.reference-footer .site-brand { margin-right: 2px; }
+.reference-footer .site-brand-mark { width: 31px; height: 31px; font-size: 15px; }
+.reference-footer .site-brand-name { font-size: 18px; }
+.reference-footer p { margin: 0; font-size: 11px; }
+.reference-footer nav { display: flex; flex-wrap: wrap; gap: 12px 20px; margin-left: auto; font-size: 10px; }
+.reference-footer nav a:hover, .reference-footer > a:not(.site-brand):hover { color: var(--gold-700); }
+.reference-footer small { width: 100%; padding-top: 11px; border-top: 1px solid rgba(122, 94, 18, .1); font-size: 9px; }
+.reference-compact-footer { margin-top: 25px; }
+
+/* Catalogue et fiche restaurant */
+.restaurant-list-page, .restaurant-detail-page { min-height: calc(100vh - 76px); background: var(--gold-50); }
+.restaurant-list-hero { padding: 55px max(24px, calc((100% - 1170px) / 2)) 45px; background: linear-gradient(135deg, #fff3d8, #fffaf0 72%); }
+.restaurant-list-hero h1 { margin: 0; color: var(--gold-900); font: 700 clamp(42px, 5.8vw, 66px)/.98 'Outfit', sans-serif; letter-spacing: -2.6px; }
+.restaurant-list-hero h1 em { color: var(--gold-700); font-style: normal; }
+.restaurant-list-hero > p:not(.reference-eyebrow) { color: #82754f; font-size: 13px; }
+.restaurant-search-result { display: inline-flex; margin: 7px 0 13px; padding: 7px 10px; border-radius: 5px; color: var(--gold-900); background: var(--gold-200); font-size: 10px; font-weight: 700; }
+.restaurant-page-search { width: min(100%, 510px); display: flex; align-items: center; gap: 10px; margin-top: 20px; padding: 0 14px; border: 1px solid rgba(122, 94, 18, .2); border-radius: 7px; color: var(--gold-700); background: #fffdf7; }
+.restaurant-page-search > span { font-size: 22px; }
+.restaurant-page-search input { width: 100%; min-width: 0; padding: 13px 0; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 12px; }
+.restaurant-list-content { padding-top: 35px; }
+.restaurant-category-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 30px; }
+.restaurant-category-filters button { display: inline-flex; align-items: center; gap: 6px; padding: 9px 13px; border: 1px solid var(--line); border-radius: 99px; color: #77683e; background: #fffdf7; font-size: 11px; font-weight: 600; transition: all .18s ease; }
+.restaurant-category-filters button:hover { border-color: var(--gold-300); }
+.restaurant-category-filters button.active { border-color: var(--gold-900); color: var(--gold-100); background: var(--gold-900); }
+.reference-demo-note { margin: -13px 0 23px; padding: 10px 13px; border: 1px solid #e7d29a; border-radius: 6px; color: #785d18; background: #fff7e3; font-size: 11px; }
+.restaurant-results-heading { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-bottom: 19px; }
+.restaurant-results-heading > span { color: #8b7b53; font-size: 11px; }
+.restaurant-list-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.restaurant-list-card { display: flex; flex-direction: column; min-width: 0; padding: 0; overflow: hidden; border: 1px solid rgba(122, 94, 18, .14); border-radius: 9px; text-align: left; color: var(--ink); background: #fffdf7; box-shadow: 0 5px 18px rgba(90, 74, 13, .04); transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+.restaurant-list-card:hover { transform: translateY(-3px); border-color: var(--gold-300); box-shadow: var(--shadow-soft); }
+.restaurant-list-image { position: relative; display: block; height: 194px; overflow: hidden; background: var(--gold-100); }
+.restaurant-list-image img { width: 100%; height: 100%; display: block; object-fit: cover; }
+.restaurant-list-info { display: flex; flex-direction: column; flex: 1; padding: 16px; }
+.restaurant-list-title { display: flex; justify-content: space-between; gap: 10px; color: var(--gold-900); font: 700 17px 'Outfit', sans-serif; }
+.restaurant-list-title > span { color: var(--gold-700); }
+.restaurant-list-category { margin-top: 6px; color: #89794e; font-size: 10px; }
+.restaurant-list-description { min-height: 34px; margin-top: 10px; color: #796e52; font-size: 11px; line-height: 1.5; }
+.restaurant-list-meta { display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-top: 14px; padding-top: 11px; border-top: 1px solid rgba(122, 94, 18, .1); color: #82744c; font-size: 9px; }
+.restaurant-list-cta { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding: 10px 12px; border-radius: 5px; color: var(--gold-900); background: var(--gold-100); font-size: 11px; font-weight: 700; }
+.restaurant-list-card:hover .restaurant-list-cta { color: var(--gold-100); background: var(--gold-900); }
+.reference-empty { grid-column: 1 / -1; padding: 45px 20px; border: 1px dashed #dec98d; border-radius: 9px; text-align: center; color: #84764f; background: #fffdf7; }
+.reference-empty > span { font-size: 33px; }
+.reference-empty h3 { margin: 8px 0 4px; color: var(--gold-900); font-size: 19px; }
+.reference-empty p { font-size: 12px; }
+.reference-empty button { margin: 4px auto 0; }
+.restaurant-not-found { margin: 45px auto; width: min(90%, 640px); }
+.restaurant-not-found h1 { color: var(--gold-900); font-size: 32px; }
+.restaurant-not-found .reference-button { margin-top: 16px; }
+.restaurant-detail-cover { position: relative; min-height: 360px; display: flex; align-items: end; background-color: #73560f; background-position: center 52%; background-size: cover; color: #fffaf0; }
+.restaurant-back-button { position: absolute; top: 22px; left: max(24px, calc((100% - 1170px) / 2)); padding: 9px 12px; border: 1px solid rgba(255, 243, 216, .4); border-radius: 5px; color: #fff3d8; background: rgba(50, 37, 4, .28); font-size: 10px; }
+.restaurant-detail-cover-copy { width: min(100% - 48px, 1170px); margin: 0 auto; padding: 55px 0 35px; }
+.restaurant-detail-cover-copy h1 { margin: 0; font: 700 clamp(40px, 5vw, 59px)/1 'Outfit', sans-serif; letter-spacing: -1.8px; }
+.restaurant-detail-cover-copy > p:not(.reference-location) { max-width: 540px; color: rgba(255, 250, 240, .85); font-size: 12px; line-height: 1.6; }
+.restaurant-detail-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 17px; }
+.restaurant-detail-pills span { padding: 7px 9px; border: 1px solid rgba(255, 243, 216, .3); border-radius: 5px; color: #fff3d8; background: rgba(50, 37, 4, .26); font-size: 10px; }
+.detail-closed { top: 25px; right: max(24px, calc((100% - 1170px) / 2)); left: auto; }
+.restaurant-menu-content { padding-top: 50px; }
+.restaurant-menu-heading { display: flex; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 24px; }
+.restaurant-menu-heading p:not(.reference-eyebrow) { margin: 8px 0 0; color: #81744f; font-size: 11px; }
+.restaurant-cart-shortcut { display: inline-flex; align-items: center; gap: 7px; color: var(--gold-700); font-size: 11px; font-weight: 700; }
+.restaurant-cart-shortcut span { min-width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; color: white; background: var(--gold-700); font-size: 9px; }
+.restaurant-menu-tools { display: flex; justify-content: space-between; align-items: center; gap: 18px; margin-bottom: 20px; }
+.restaurant-dish-filters { margin-bottom: 0; }
+.restaurant-menu-tools .restaurant-page-search { width: min(100%, 290px); margin: 0; }
+.restaurant-dish-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 17px; }
+.restaurant-dish-card { overflow: hidden; border: 1px solid rgba(122, 94, 18, .14); border-radius: 8px; background: #fffdf7; }
+.restaurant-dish-image { position: relative; width: 100%; height: 188px; display: block; padding: 0; overflow: hidden; border: 0; background: var(--gold-100); }
+.restaurant-dish-image img { width: 100%; height: 100%; display: block; object-fit: cover; transition: transform .25s ease; }
+.restaurant-dish-image:hover img { transform: scale(1.04); }
+.restaurant-dish-image span { position: absolute; top: 10px; left: 10px; padding: 6px 8px; border-radius: 4px; color: var(--gold-900); background: var(--gold-200); font-size: 9px; font-weight: 800; }
+.restaurant-dish-info { padding: 14px; }
+.restaurant-dish-info h3 { margin: 0; color: var(--gold-900); font: 700 16px 'Outfit', sans-serif; }
+.restaurant-dish-info p { min-height: 34px; margin: 6px 0 12px; color: #827652; font-size: 10px; line-height: 1.5; }
+.restaurant-dish-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px solid rgba(122, 94, 18, .11); }
+.restaurant-dish-bottom strong { color: var(--gold-700); font-size: 12px; }
+.restaurant-dish-bottom button { width: 31px; height: 31px; border: 0; border-radius: 50%; color: var(--gold-100); background: var(--gold-900); font-size: 20px; line-height: 1; }
+.restaurant-dish-bottom button:disabled { cursor: not-allowed; opacity: .5; }
+.reference-toast { position: fixed; z-index: 70; right: 22px; bottom: 22px; display: flex; align-items: center; gap: 18px; padding: 13px 16px; border-radius: 7px; color: #fff8e9; background: var(--gold-900); box-shadow: var(--shadow-soft); font-size: 12px; }
+.reference-toast a { color: var(--gold-300); font-weight: 700; }
+.reference-option-modal { color: var(--ink); }
+.reference-option-modal .reference-eyebrow { margin-top: 10px; }
+.reference-option-modal h2 { color: var(--gold-900); font-family: 'Outfit', sans-serif; }
+.reference-option-image { width: calc(100% + 56px); height: 190px; display: block; margin: -28px -28px 22px; object-fit: cover; }
+.reference-option-price { color: var(--gold-700); font-size: 15px; font-weight: 800; }
+.reference-button-wide { width: 100%; margin-top: 14px; }
+.option-close { color: var(--gold-900); background: var(--gold-100); }
+.option-empty { color: #7d704a; background: var(--gold-100); }
+
+/* Panier invité et commande */
+.reference-cart-page { width: min(100% - 48px, 1120px); margin: 0 auto; padding-top: 48px; }
+.reference-cart-heading { margin-bottom: 27px; }
+.reference-cart-heading h1 { margin: 0; color: var(--gold-900); font: 700 clamp(38px, 5vw, 54px)/1 'Outfit', sans-serif; letter-spacing: -1.8px; }
+.reference-cart-heading > p:last-child { margin: 10px 0 0; color: #837650; font-size: 12px; }
+.reference-cart-empty { padding: 55px 20px; border: 1px solid var(--line); border-radius: 10px; text-align: center; background: #fffdf7; }
+.reference-cart-empty > span { font-size: 42px; }
+.reference-cart-empty h2 { margin: 10px 0 5px; color: var(--gold-900); font-size: 24px; }
+.reference-cart-empty p { margin: 0 0 20px; color: #897b54; font-size: 12px; }
+.reference-cart-layout { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr); align-items: start; gap: 20px; }
+.reference-cart-main { display: grid; gap: 16px; }
+.reference-cart-panel { padding: 20px; border: 1px solid rgba(122, 94, 18, .14); border-radius: 9px; background: #fffdf7; }
+.reference-cart-panel-title { display: flex; align-items: end; justify-content: space-between; gap: 14px; margin-bottom: 13px; }
+.reference-cart-panel-title h2 { margin: 0; color: var(--gold-900); font: 700 22px 'Outfit', sans-serif; }
+.reference-cart-panel-title > span { color: #8c7e58; font-size: 10px; }
+.reference-cart-line { display: flex; gap: 14px; padding: 15px 0; border-top: 1px solid rgba(122, 94, 18, .1); }
+.reference-cart-thumb { width: 80px; height: 72px; flex: none; display: grid; place-items: center; overflow: hidden; border-radius: 7px; color: var(--gold-700); background: var(--gold-100); font-size: 26px; }
+.reference-cart-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.reference-cart-line-info { min-width: 0; flex: 1; }
+.reference-cart-line-top { display: flex; justify-content: space-between; gap: 12px; color: var(--gold-900); font-size: 12px; }
+.reference-cart-line-top b { white-space: nowrap; }
+.reference-cart-line-info > p { margin: 5px 0 9px; color: #8c7d56; font-size: 10px; }
+.reference-cart-controls { display: flex; align-items: center; gap: 9px; }
+.reference-cart-controls button:not(.reference-remove) { width: 25px; height: 25px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 50%; color: var(--gold-900); background: white; font-size: 14px; }
+.reference-cart-controls span { min-width: 13px; text-align: center; color: var(--gold-900); font-size: 10px; font-weight: 700; }
+.reference-cart-controls .reference-remove { margin-left: 5px; border: 0; color: #a3523b; background: transparent; font-size: 10px; }
+.reference-pickup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 8px 0 19px; }
+.reference-pickup-choice { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-height: 90px; padding: 12px; border: 1px solid var(--line); border-radius: 7px; color: #7c6e49; text-align: left; background: #fff; }
+.reference-pickup-choice.active { border-color: var(--gold-700); color: var(--gold-900); background: var(--gold-100); box-shadow: inset 0 0 0 1px var(--gold-700); }
+.reference-pickup-choice > span { font-size: 17px; }
+.reference-pickup-choice strong { font-size: 11px; }
+.reference-pickup-choice small { font-size: 9px; }
+.reference-form-field { display: flex; flex-direction: column; gap: 7px; margin-top: 15px; color: #77683f; font-size: 10px; font-weight: 700; }
+.reference-form-field > span { display: inline; color: #a3936b; font-weight: 400; }
+.reference-form-field input, .reference-form-field textarea, .reference-form-field select { width: 100%; min-width: 0; padding: 11px 12px; border: 1px solid var(--line); border-radius: 6px; outline: 0; color: var(--ink); background: #fff; font-size: 11px; font-weight: 400; }
+.reference-form-field input:focus, .reference-form-field textarea:focus, .reference-form-field select:focus { border-color: var(--gold-500); box-shadow: 0 0 0 3px rgba(204, 150, 31, .12); }
+.reference-cart-summary { position: sticky; top: 95px; padding: 23px; border-radius: 9px; color: var(--gold-100); background: var(--gold-900); box-shadow: 0 15px 35px rgba(90, 74, 13, .14); }
+.reference-cart-summary .reference-eyebrow { color: var(--gold-300); }
+.reference-cart-summary h2 { margin: 0 0 20px; font: 700 24px 'Outfit', sans-serif; }
+.reference-summary-line, .reference-summary-total { display: flex; justify-content: space-between; gap: 12px; font-size: 11px; }
+.reference-summary-line { margin-top: 11px; color: rgba(255, 243, 216, .78); }
+.reference-summary-total { margin-top: 17px; padding-top: 16px; border-top: 1px solid rgba(255, 243, 216, .24); font-size: 13px; }
+.reference-summary-total strong:last-child { color: var(--gold-300); }
+.reference-discount { color: #f3d789; }
+.reference-coupon-field { margin-top: 20px; color: #f6e7c3; }
+.reference-coupon-field select { color: var(--gold-100); border-color: rgba(255, 243, 216, .23); background: rgba(255, 243, 216, .08); }
+.reference-coupon-field option { color: #3f3108; background: #fffdf7; }
+.reference-payment-options { margin-top: 19px; }
+.reference-payment-options > p { margin: 0 0 8px; color: #f6e7c3; font-size: 10px; font-weight: 700; }
+.reference-payment-options > div { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.reference-payment-options button { padding: 10px 8px; border: 1px solid rgba(255, 243, 216, .18); border-radius: 6px; color: #fff3d8; background: rgba(255, 243, 216, .07); font-size: 10px; font-weight: 700; }
+.reference-payment-options button.active { border-color: var(--gold-300); color: var(--gold-900); background: var(--gold-300); }
+.reference-payment-options small { display: block; margin-top: 4px; font-size: 8px; font-weight: 400; }
+.reference-cart-summary .reference-error { color: #ffd4c7; }
+.reference-login-hint { margin: 14px 0 0; color: rgba(255, 243, 216, .69); font-size: 9px; line-height: 1.45; }
+.reference-checkout-button { width: 100%; margin-top: 20px; border-color: var(--gold-300); color: var(--gold-900); background: var(--gold-300); }
+.reference-checkout-button:hover { color: var(--gold-100); background: var(--gold-700); }
+
+/* Connexion, inscription et demandes d’accès */
+.reference-auth-page { min-height: 620px; display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); background: var(--gold-50); }
+.reference-auth-visual { min-height: 620px; display: flex; flex-direction: column; justify-content: space-between; padding: 33px clamp(25px, 6vw, 78px); color: #fff3d8; background-color: var(--gold-900); background-position: center; background-size: cover; }
+.reference-auth-visual .reference-location { align-self: flex-start; }
+.reference-auth-visual .reference-eyebrow { color: var(--gold-300); }
+.reference-auth-visual > div { max-width: 490px; }
+.reference-auth-visual h1 { margin: 0 0 15px; font: 700 clamp(37px, 4.4vw, 57px)/1.02 'Outfit', sans-serif; letter-spacing: -1.8px; }
+.reference-auth-visual > div > p:last-child { max-width: 370px; color: rgba(255, 243, 216, .8); font-size: 13px; line-height: 1.65; }
+.reference-auth-signature { color: var(--gold-300); font-size: 10px; letter-spacing: 1px; text-transform: uppercase; }
+.reference-auth-benefits { display: flex; flex-wrap: wrap; gap: 8px 15px; color: #fff3d8; font-size: 10px; }
+.reference-auth-benefits span { padding: 7px 9px; border: 1px solid rgba(255, 243, 216, .25); border-radius: 99px; background: rgba(50, 37, 4, .2); }
+.reference-auth-form-area { display: grid; place-items: center; padding: 45px 25px; }
+.reference-auth-card { width: min(100%, 435px); padding: 31px; border: 1px solid rgba(122, 94, 18, .14); border-radius: 10px; background: #fffdf7; box-shadow: var(--shadow-soft); }
+.reference-auth-card h2 { margin: 0; color: var(--gold-900); font: 700 39px/1.08 'Outfit', sans-serif; letter-spacing: -1.2px; }
+.reference-auth-subtitle { margin: 10px 0 24px; color: #887950; font-size: 11px; line-height: 1.6; }
+.reference-auth-form { display: flex; flex-direction: column; gap: 15px; }
+.reference-auth-form label { display: flex; flex-direction: column; gap: 7px; color: #76683f; font-size: 10px; font-weight: 700; }
+.reference-auth-form input { width: 100%; padding: 12px 13px; border: 1px solid var(--line); border-radius: 6px; outline: 0; color: var(--ink); background: #fff; font-size: 12px; font-weight: 400; }
+.reference-auth-form input:focus { border-color: var(--gold-500); box-shadow: 0 0 0 3px rgba(204, 150, 31, .12); }
+.reference-auth-form .reference-button { margin-top: 3px; }
+.reference-auth-switch { margin: 20px 0 0; color: #857750; text-align: center; font-size: 10px; }
+.reference-auth-switch a, .reference-guest-link { color: var(--gold-700); font-weight: 700; }
+.reference-guest-link { display: block; margin-top: 13px; text-align: center; font-size: 10px; }
+.reference-optional { color: #a2936c; font-weight: 400; }
+.reference-access-page { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); gap: 35px; align-items: start; padding: 58px max(24px, calc((100% - 1110px) / 2)) 66px; background: #fffaf0; }
+.reference-access-intro { position: sticky; top: 110px; min-height: 400px; display: flex; flex-direction: column; justify-content: flex-end; padding: 31px; overflow: hidden; border-radius: 10px; color: #fff3d8; background-color: var(--gold-900); background-image: linear-gradient(0deg, rgba(42, 32, 7, .85), rgba(42, 32, 7, .12)), var(--access-image); background-position: center; background-size: cover; }
+.reference-access-intro .reference-location { position: absolute; top: 25px; left: 25px; }
+.reference-access-intro .reference-eyebrow { color: var(--gold-300); }
+.reference-access-intro h1 { max-width: 510px; margin: 0; font: 700 clamp(35px, 4vw, 52px)/1.03 'Outfit', sans-serif; letter-spacing: -1.5px; }
+.reference-access-intro > p:not(.reference-location):not(.reference-eyebrow) { max-width: 430px; color: rgba(255, 243, 216, .8); font-size: 12px; line-height: 1.6; }
+.reference-access-tabs { display: flex; gap: 8px; margin-top: 14px; }
+.reference-access-tabs button { padding: 9px 12px; border: 1px solid rgba(255, 243, 216, .32); border-radius: 5px; color: #fff3d8; background: rgba(42, 32, 7, .25); font-size: 10px; }
+.reference-access-tabs button.active { border-color: var(--gold-300); color: var(--gold-900); background: var(--gold-300); font-weight: 700; }
+.reference-access-form { padding: 25px; border: 1px solid var(--line); border-radius: 10px; background: #fffdf7; box-shadow: var(--shadow-soft); }
+.reference-access-form-title { margin-bottom: 19px; }
+.reference-access-form-title h2 { margin: 0; color: var(--gold-900); font: 700 26px 'Outfit', sans-serif; }
+.reference-access-form-title > p:last-child { color: #82754e; font-size: 10px; line-height: 1.55; }
+.reference-access-form .reference-form-field { margin-top: 12px; }
+.reference-success { padding: 11px 12px; border: 1px solid #d7e4c4; border-radius: 6px; color: #536b2d; background: #f2f7e8; font-size: 11px; line-height: 1.5; }
+
+/* Couleurs communes des autres écrans existants */
+.topbar, .history-header { background: rgba(255, 253, 247, .96); border-color: var(--line); }
+.wordmark { color: var(--gold-900); font-family: 'Outfit', sans-serif; }
+.wordmark > span:not(.wordmark-dot) { color: var(--gold-700); }
+.wordmark-dot { background: var(--gold-500); }
+.eyebrow { color: var(--gold-700); }
+.primary-button { color: #fff8e8; background: var(--gold-700); box-shadow: 0 8px 18px rgba(166, 121, 23, .2); }
+.primary-button:hover { background: var(--gold-900); }
+.category-tabs button.active { border-color: var(--gold-900); background: var(--gold-900); }
+.dish-footer strong, .order-total a, .auth-switch a { color: var(--gold-700); }
+.mobile-bottom-nav { border-color: var(--line) !important; background: rgba(255, 253, 247, .96) !important; }
+.loading-screen { background: var(--gold-50); }
+.brand-mark { color: var(--gold-100); background: var(--gold-900); }
+.demo-alert { border-color: #e7d29a; color: #785d18; background: #fff7e3; }
+
+@media (max-width: 1050px) {
+  .site-header-inner { width: calc(100% - 24px); min-height: 62px; padding-right: 20px; gap: 12px; }
+  .site-nav { display: none; }
+  .site-header-actions { margin-left: auto; gap: 13px; }
+  .site-account-link { font-size: 14px; }
+  .site-register-link { margin-left: 7px; margin-right: -7px; padding: 9px 15px; font-size: 13px; }
+  .site-menu-toggle { display: grid; }
+  .site-menu-toggle svg { width: 24px; height: 24px; }
+  .site-cart-link svg { width: 22px; height: 22px; }
+  .site-mobile-nav { display: grid; gap: 0; padding: 12px 21px 16px; border-top: 1px solid #f0ede6; background: #fff; }
+  .site-mobile-nav a { padding: 12px 14px; border: 0; color: #272419; font-size: 14px; font-weight: 400; line-height: 1.45; }
+  .site-mobile-nav a:hover { color: var(--gold-700); }
+  .reference-how { gap: 35px; }
+  .restaurant-list-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 820px) {
+  .reference-hero { min-height: 535px; }
+  .reference-hero-copy { padding: 65px 0; }
+  .reference-how { grid-template-columns: 1fr; gap: 25px; }
+  .reference-auth-page { grid-template-columns: .85fr 1.15fr; }
+  .reference-auth-visual { padding: 27px; }
+  .reference-access-page { grid-template-columns: 1fr; }
+  .reference-access-intro { position: relative; top: 0; min-height: 300px; }
+}
+@media (max-width: 640px) {
+  .site-header-inner { width: calc(100% - 30px); }
+  .site-brand-mark { width: 35px; height: 35px; font-size: 17px; }
+  .site-brand-name { font-size: 20px; }
+  .site-header-actions { gap: 8px; }
+  .site-account-link, .site-register-link { display: none; }
+  .site-cart-link { min-width: 35px; height: 35px; }
+  .reference-hero { min-height: 500px; background-position: 56% center; }
+  .reference-hero-copy { width: calc(100% - 36px); padding: 53px 0; }
+  .reference-hero h1 { font-size: clamp(44px, 12vw, 62px); letter-spacing: -2.3px; }
+  .reference-hero-text { max-width: 350px; font-size: 13px; }
+  .reference-search { grid-template-columns: 1fr; gap: 4px; padding: 8px; }
+  .reference-search-field { min-height: 43px; }
+  .reference-search .reference-button { width: 100%; }
+  .reference-schedule { padding-top: 6px; }
+  .reference-section { width: calc(100% - 36px); padding: 47px 0; }
+  .reference-section-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .reference-section-heading h2, .restaurant-results-heading h2, .restaurant-menu-heading h2 { font-size: 29px; }
+  .reference-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+  .reference-category-card { min-height: 76px; gap: 9px; padding: 11px; font-size: 11px; }
+  .reference-category-icon { width: 37px; height: 37px; font-size: 18px; }
+  .reference-featured { padding: 49px 18px; }
+  .reference-featured > .reference-section-heading, .reference-featured > .reference-restaurant-grid { width: 100%; }
+  .reference-restaurant-grid, .restaurant-list-grid, .restaurant-dish-grid { grid-template-columns: 1fr; }
+  .reference-restaurant-image { height: 205px; }
+  .reference-how { padding: 48px 20px; }
+  .reference-join { width: calc(100% - 36px); grid-template-columns: 1fr; padding: 28px 0; }
+  .reference-footer { padding: 24px 18px; gap: 11px 16px; }
+  .reference-footer nav { width: 100%; margin-left: 0; }
+  .restaurant-list-hero { padding: 40px 19px 34px; }
+  .restaurant-list-hero h1 { font-size: 48px; }
+  .restaurant-list-content, .restaurant-menu-content { width: calc(100% - 36px); padding: 32px 0 44px; }
+  .restaurant-category-filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 5px; margin-bottom: 22px; }
+  .restaurant-category-filters button { white-space: nowrap; }
+  .restaurant-list-image { height: 195px; }
+  .restaurant-detail-cover { min-height: 330px; }
+  .restaurant-back-button { left: 18px; }
+  .restaurant-detail-cover-copy { width: calc(100% - 36px); padding-bottom: 25px; }
+  .restaurant-detail-cover-copy h1 { font-size: 43px; }
+  .restaurant-menu-heading { align-items: flex-start; }
+  .restaurant-menu-tools { align-items: stretch; flex-direction: column-reverse; }
+  .restaurant-menu-tools .restaurant-page-search { width: 100%; }
+  .restaurant-dish-image { height: 210px; }
+  .reference-cart-page { width: calc(100% - 32px); padding-top: 34px; }
+  .reference-cart-layout { grid-template-columns: 1fr; }
+  .reference-cart-summary { position: relative; top: 0; }
+  .reference-cart-panel { padding: 15px; }
+  .reference-cart-line { gap: 10px; }
+  .reference-cart-thumb { width: 64px; height: 64px; }
+  .reference-pickup-grid { gap: 6px; }
+  .reference-pickup-choice { min-height: 83px; padding: 9px; }
+  .reference-pickup-choice strong { font-size: 10px; }
+  .reference-pickup-choice small { font-size: 8px; }
+  .reference-auth-page { grid-template-columns: 1fr; }
+  .reference-auth-visual { min-height: 230px; padding: 22px 19px; }
+  .reference-auth-visual .reference-location { margin-bottom: 15px; }
+  .reference-auth-visual h1 { font-size: 34px; }
+  .reference-auth-visual > div > p:last-child { display: none; }
+  .reference-auth-signature, .reference-auth-benefits { display: none; }
+  .reference-auth-form-area { padding: 24px 17px 35px; }
+  .reference-auth-card { padding: 24px 19px; }
+  .reference-auth-card h2 { font-size: 34px; }
+  .reference-access-page { padding: 30px 17px 45px; }
+  .reference-access-intro { min-height: 270px; padding: 22px; }
+  .reference-access-intro h1 { font-size: 36px; }
+  .reference-access-form { padding: 19px; }
+  .reference-toast { right: 12px; bottom: 12px; left: 12px; justify-content: space-between; }
+}
