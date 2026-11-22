@@ -15,7 +15,26 @@ function AvisCommande({ commande }) {
 }
 export default function SuiviCommande() {
   const { id } = useParams(); const [commande, setCommande] = useState(null); const [erreur, setErreur] = useState(null);
-  useEffect(() => { let socket; async function init() { try { const donnees = await api.obtenirCommande(id); setCommande(donnees); socket = io(import.meta.env.VITE_SOCKET_URL || 'https://resto-ziguinchor.onrender.com'); socket.on('connect', () => socket.emit('rejoindre_resto', donnees.restaurantId)); socket.on('statut_commande', (maj) => { if (maj.id === id) setCommande((prev) => ({ ...prev, ...maj })); }); } catch (e) { setErreur(e.message); } } init(); return () => socket?.disconnect(); }, [id]);
+  useEffect(() => {
+    let socket;
+    async function init() {
+      try {
+        const donnees = await api.obtenirCommande(id);
+        setCommande(donnees);
+        socket = io(import.meta.env.VITE_SOCKET_URL || 'https://resto-ziguinchor.onrender.com', {
+          auth: { token: localStorage.getItem('token') },
+        });
+        socket.on('connect', () => socket.emit('rejoindre_commande', id));
+        socket.on('statut_commande', (maj) => {
+          if (maj.id === id) setCommande((prev) => ({ ...prev, ...maj }));
+        });
+      } catch (e) {
+        setErreur(e.message);
+      }
+    }
+    init();
+    return () => socket?.disconnect();
+  }, [id]);
   if (erreur) return <div className="p-8 text-center text-red-500">{erreur}</div>;
   if (!commande) return <div className="loading-screen"><span className="brand-mark">R</span><p>On suit votre commande…</p></div>;
   const etapeActuelle = ETAPES.indexOf(commande.statut);

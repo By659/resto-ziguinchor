@@ -13,6 +13,15 @@ async function peutRejoindreRestaurant(utilisateur, restaurantId, db = prisma) {
   return utilisateur.role === 'CUISINIER';
 }
 
+async function peutRejoindreCommande(utilisateur, commandeId, db = prisma) {
+  if (!utilisateur || utilisateur.role !== 'CLIENT') return false;
+  const commande = await db.commande.findUnique({
+    where: { id: commandeId },
+    select: { clientId: true },
+  });
+  return Boolean(commande && commande.clientId === utilisateur.id);
+}
+
 function initSocket(io) {
   io.use((socket, next) => {
     const token = socket.handshake.auth?.token;
@@ -41,6 +50,19 @@ function initSocket(io) {
       }
     });
 
+    socket.on('rejoindre_commande', async (commandeId, repondre) => {
+      try {
+        if (typeof commandeId !== 'string' || !await peutRejoindreCommande(socket.utilisateur, commandeId)) {
+          if (typeof repondre === 'function') repondre({ ok: false, message: 'Accès à cette commande refusé' });
+          return;
+        }
+        socket.join(`commande:${commandeId}`);
+        if (typeof repondre === 'function') repondre({ ok: true });
+      } catch (err) {
+        if (typeof repondre === 'function') repondre({ ok: false, message: 'Impossible de rejoindre le suivi de commande' });
+      }
+    });
+
     socket.on('disconnect', () => {
       // rien à nettoyer explicitement, socket.io gère le retrait des rooms
     });
@@ -49,3 +71,4 @@ function initSocket(io) {
 
 module.exports = initSocket;
 module.exports.peutRejoindreRestaurant = peutRejoindreRestaurant;
+module.exports.peutRejoindreCommande = peutRejoindreCommande;

@@ -183,6 +183,7 @@ async function changerStatut(req, res, next) {
     const commande = await prisma.commande.findUnique({ where: { id } });
 
     req.app.get('io').to(`resto:${commande.restaurantId}`).emit('statut_commande', commande);
+    req.app.get('io').to(`commande:${commande.id}`).emit('statut_commande', commande);
 
     // Déclenché uniquement au passage à LIVREE : séquestre versé + points fidélité crédités
     if (statut === 'LIVREE') {
