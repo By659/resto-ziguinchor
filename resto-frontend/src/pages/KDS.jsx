@@ -47,7 +47,7 @@ export default function KDS() {
       const initiales = await api.commandesRestaurant(id);
       setCommandes(initiales);
 
-      const socket = io(import.meta.env.VITE_SOCKET_URL, {
+      const socket = io(import.meta.env.VITE_SOCKET_URL || 'https://resto-ziguinchor.onrender.com', {
         auth: { token: localStorage.getItem('token') },
         reconnection: true,
       });

@@ -1,4 +1,4 @@
-const API_URL = import.meta.env.VITE_API_URL;
+const API_URL = import.meta.env.VITE_API_URL || 'https://resto-ziguinchor.onrender.com/api';
 
 // Petit client fetch qui attache automatiquement le token JWT stocké,
 // et centralise la gestion des erreurs de l'API.
