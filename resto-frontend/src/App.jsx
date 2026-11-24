@@ -16,12 +16,14 @@ import Dashboard from './pages/Dashboard';
 import GestionMenu from './pages/GestionMenu';
 import Livreur from './pages/Livreur';
 import Historique from './pages/Historique';
+import InitialiserAdmin from './pages/InitialiserAdmin';
 
 export default function App() {
   return <AuthProvider><CartProvider><OnlineStatus /><Routes>
     <Route path="/" element={<Home />} />
     <Route path="/login" element={<Login />} />
     <Route path="/register" element={<Register />} />
+    <Route path="/initialiser-admin" element={<InitialiserAdmin />} />
     <Route path="/demande-acces" element={<DemandeAcces />} />
     <Route path="/menu" element={<Menu />} />
     <Route path="/restaurants" element={<Menu />} />

@@ -9,5 +9,6 @@ router.use('/livraisons', require('./livraison.routes'));
 router.use('/fidelite', require('./fidelite.routes'));
 router.use('/notations', require('./notation.routes'));
 router.use('/demandes-acces', require('./demande-acces.routes'));
+router.use('/admin-bootstrap', require('./admin-bootstrap.routes'));
 
 module.exports = router;

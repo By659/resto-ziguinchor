@@ -27,6 +27,11 @@ async function requete(chemin, options = {}) {
 export const api = {
   login: (telephone, motDePasse) => requete('/auth/login', { method: 'POST', body: { telephone, motDePasse } }),
   register: (payload) => requete('/auth/register', { method: 'POST', body: payload }),
+  initialiserPremierAdmin: (telephone, secret) => requete('/admin-bootstrap', {
+    method: 'POST',
+    body: { telephone },
+    headers: { 'X-Admin-Bootstrap-Secret': secret },
+  }),
   listerRestaurants: () => requete('/restaurants'),
   monRestaurant: () => requete('/restaurants/moi'),
   rechercherRestaurants: (params) => requete(`/restaurants/search?${new URLSearchParams(params).toString()}`),

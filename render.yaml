@@ -19,4 +19,6 @@ services:
       - key: CORS_ORIGIN
         sync: false
       - key: OPENROUTESERVICE_API_KEY
-        value: ors_key
+        sync: false
+      - key: ADMIN_BOOTSTRAP_SECRET
+        sync: false

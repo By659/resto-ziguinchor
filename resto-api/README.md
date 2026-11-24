@@ -44,6 +44,18 @@ npm run dev
 
 Ne commitez jamais `.env` ou `.env.test` et ne placez aucun secret dans React.
 
+## Initialiser le premier administrateur sur Render
+
+L’inscription publique crée toujours un compte `CLIENT`. Pour initialiser l’unique premier administrateur :
+
+1. Crée ton propre compte depuis `/register` avec un mot de passe que tu gardes privé.
+2. Dans les variables du service API Render, ajoute `ADMIN_BOOTSTRAP_SECRET` et génère une valeur aléatoire d’au moins 32 caractères. Ne la mets ni dans Git ni dans une conversation.
+3. Après le déploiement API et frontend, ouvre `https://resto-ziguinchor.vercel.app/initialiser-admin`, puis saisis le téléphone du compte créé et le secret temporaire.
+4. Après le succès, supprime immédiatement `ADMIN_BOOTSTRAP_SECRET` dans Render et redéploie. Le serveur refuse aussi toute nouvelle initialisation dès qu’un administrateur existe.
+5. Déconnecte-toi puis reconnecte-toi pour obtenir un jeton contenant le nouveau rôle.
+
+Cette procédure ne crée pas de compte et ne définit ni ne révèle de mot de passe. Elle ne permet que la promotion d’un compte client existant, une seule fois. L’application n’a pas encore d’interface d’administration pour créer des restaurants; l’ajout de données de test doit être fait séparément après l’initialisation.
+
 ## Capacités déjà présentes (à distinguer d’une vérification en production)
 
 - Authentification JWT et rôles métier. L’inscription publique crée désormais toujours un rôle `CLIENT` ; les rôles privilégiés sont accordés séparément.
